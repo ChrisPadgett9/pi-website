@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi Command Runner</title>
+</head>
+<body>
+    <h1>Run Commands on Raspberry Pi</h1>
+    <form id="command-form">
+        <label for="command">Command:</label>
+        <input type="text" id="command" name="command" required>
+        <button type="submit">Run</button>
+    </form>
+    <pre id="output"></pre>
+
+    <script>
+        document.getElementById('command-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const command = document.getElementById('command').value;
+            const output = document.getElementById('output');
+            output.textContent = 'Running...';
+
+            try {
+                const response = await fetch('/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ command })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    output.textContent = `STDOUT:\n${result.stdout}\n\nSTDERR:\n${result.stderr}`;
+                } else {
+                    output.textContent = `Error: ${result.error}`;
+                }
+            } catch (err) {
+                output.textContent = `Request failed: ${err.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
